@@ -478,35 +478,47 @@ body {
   animation: pulseFast 0.9s infinite;
 }
 
-/* History Strip (Upgraded Size & Readability for Last 5 / Last 10 Numbers) */
+/* History Strip (Fixed Mobile Box Overflow & Hidden Scrollbar) */
 .history-strip {
   display: flex;
-  gap: 7px;
+  gap: 6px;
   overflow-x: auto;
-  padding-bottom: 4px;
+  padding: 2px 2px 4px 2px;
   align-items: center;
+  scrollbar-width: none; /* Firefox mein scrollbar chhupayega */
+  -ms-overflow-style: none;
+}
+
+.history-strip::-webkit-scrollbar {
+  display: none; /* Chrome/Mobile mein ganda grey scrollbar chhupayega */
 }
 
 .history-chip {
+  flex-shrink: 0; /* Box ko kabhi pichakne nahi dega */
+  width: auto;
+  min-width: 34px;
   background: #16072b;
   border: 1.5px solid var(--border-purple);
-  border-radius: 10px;
-  padding: 5px 11px;
-  font-size: 0.98rem;
+  border-radius: 9px;
+  padding: 4px 9px;
+  font-size: 0.88rem;
   font-weight: 800;
   color: #e2d4ff;
   white-space: nowrap;
-  min-width: 40px;
-  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.1;
 }
 
 .history-chip.latest {
   background: linear-gradient(135deg, rgba(255, 107, 0, 0.28), rgba(245, 184, 46, 0.28));
   border: 2px solid var(--gold);
   color: var(--gold-bright);
-  font-size: 1.08rem;
+  font-size: 0.92rem;
   font-weight: 900;
-  box-shadow: 0 0 12px rgba(245, 184, 46, 0.4);
+  padding: 4px 10px;
+  box-shadow: 0 0 10px rgba(245, 184, 46, 0.35);
 }
 
 /* Tables */
@@ -528,12 +540,12 @@ body {
   text-transform: uppercase;
 }
 
-/* 3x9 Tambola Ticket Card */
+/* 3x9 Tambola Ticket Card (Clean Mobile Fit) */
 .ticket-card {
   background: var(--ticket-cream);
   border: 3px solid var(--ticket-border);
   border-radius: 16px;
-  padding: 12px;
+  padding: 10px 8px;
   margin-bottom: 14px;
   color: #1f0c38;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
@@ -550,7 +562,7 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: #4a2574;
   flex-wrap: wrap;
@@ -560,7 +572,7 @@ body {
 .ticket-grid {
   display: grid;
   grid-template-columns: repeat(9, 1fr);
-  gap: 5px;
+  gap: 4px;
 }
 
 .ticket-cell {
@@ -569,9 +581,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.98rem;
+  font-size: 0.94rem;
   font-weight: 800;
+  line-height: 1;
   position: relative;
+  overflow: hidden;
 }
 
 .ticket-cell.empty {
@@ -600,12 +614,15 @@ body {
   cursor: default;
 }
 
+/* Neat Corner Tick that never overlaps 2-digit numbers on mobile */
 .ticket-cell.num.marked::after {
   content: '✓';
   position: absolute;
   top: 1px;
-  right: 3px;
-  font-size: 0.55rem;
+  right: 2px;
+  font-size: 0.45rem;
+  line-height: 1;
+  opacity: 0.9;
 }
 
 .ticket-cell.num.bogey-flash {
@@ -643,7 +660,7 @@ body {
   z-index: 2;
 }
 
-/* Sticky Top Bar for Player (Enhanced for Huge Ball) */
+/* Sticky Top Bar for Player */
 .player-sticky-top {
   position: sticky;
   top: 48px;
@@ -651,7 +668,7 @@ body {
   background: rgba(24, 9, 44, 0.98);
   border: 2px solid var(--gold);
   border-radius: 18px;
-  padding: 12px 14px;
+  padding: 12px;
   margin-bottom: 14px;
   backdrop-filter: blur(8px);
   box-shadow: 0 10px 26px rgba(0, 0, 0, 0.65);
@@ -660,12 +677,20 @@ body {
 .sticky-top-main {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   margin-bottom: 10px;
 }
 
+@media (max-width: 480px) {
+  .player-sticky-top .giant-ball {
+    width: 86px;
+    height: 86px;
+    font-size: 2.85rem;
+  }
+}
+
 .player-callout-title {
-  font-size: 1.02rem;
+  font-size: 1rem;
   color: var(--gold-bright);
   font-weight: 800;
   line-height: 1.25;
