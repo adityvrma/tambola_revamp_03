@@ -1083,93 +1083,104 @@ function archiveCurrentRound(state, reason) {
    SOOTHING FESTIVE AMBIENT BGM SYNTHESIZER + AUTO VOICE DUCKING
    ============================================================================ */
 
-let bgmAudioCtx = null;
-let bgmMasterGain = null;
-let bgmNoteTimer = null;
-let isBgmPlaying = false;
-const BGM_NORMAL_VOL = 0.12;
-const BGM_DUCKED_VOL = 0.015;
+/* ============================================================================
+   CUSTOM MP3 BACKGROUND MUSIC ENGINE (CONTINUOUS LOOP + EASY VOLUME CONTROL)
+   ============================================================================ */
 
-const FESTIVE_PENTATONIC_NOTES = [
-  261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25
-];
+// 👇 BHAI VOLUME YAHAN SE SET KAR (0.00 se lekar 1.00 tak):
+// Example: 0.15 = 15% Volume | 0.25 = 25% Volume | 0.40 = 40% Volume | 1.0 = 100% Full Loud
+const BGM_NORMAL_VOL = 0.22; // Jab normal music baj raha ho (22% Volume)
+const BGM_DUCKED_VOL = 0.03; // Jab Voice Artist Number bole tab music kitna slow ho (3% Volume)
+
+// Music file ka naam (admin.html aur player.html ke barabar mein 'bgm.mp3' rakhna)
+const BGM_FILE_PATH = 'bgm.mp3';
+
+let bgmAudioCtx = null; // Kept for compatibility with unlockBrowserAudioAndWakeLock()
+let bgmAudioEl = null;
+let bgmFadeInterval = null;
+let isBgmPlaying = false;
+
+function getOrCreateBgmAudioElement() {
+  if (!bgmAudioEl) {
+    bgmAudioEl = new Audio(BGM_FILE_PATH);
+    bgmAudioEl.loop = true; // Continuous non-stop repeat mode!
+    bgmAudioEl.preload = 'auto';
+    bgmAudioEl.volume = BGM_NORMAL_VOL;
+  }
+  return bgmAudioEl;
+}
+
+// Smoothly transitions volume up or down so it never sounds abrupt
+function fadeBgmVolumeTo(targetVol, durationMs = 250) {
+  if (!bgmAudioEl) return;
+  if (bgmFadeInterval) {
+    clearInterval(bgmFadeInterval);
+    bgmFadeInterval = null;
+  }
+
+  const clampedTarget = Math.max(0, Math.min(1, targetVol));
+  const startVol = bgmAudioEl.volume;
+  const diff = clampedTarget - startVol;
+
+  if (Math.abs(diff) < 0.01 || durationMs <= 0) {
+    bgmAudioEl.volume = clampedTarget;
+    return;
+  }
+
+  const steps = 10;
+  const stepTime = Math.max(15, Math.floor(durationMs / steps));
+  let currentStep = 0;
+
+  bgmFadeInterval = setInterval(() => {
+    currentStep++;
+    if (currentStep >= steps || !bgmAudioEl) {
+      if (bgmAudioEl) bgmAudioEl.volume = clampedTarget;
+      clearInterval(bgmFadeInterval);
+      bgmFadeInterval = null;
+    } else {
+      bgmAudioEl.volume = Math.max(0, Math.min(1, startVol + (diff * (currentStep / steps))));
+    }
+  }, stepTime);
+}
 
 function startSoothingBackgroundMusic() {
   if (isBgmPlaying) return true;
 
   try {
-    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    if (!bgmAudioCtx) {
-      bgmAudioCtx = new AudioContextClass();
+    const audio = getOrCreateBgmAudioElement();
+    audio.volume = 0.01;
+    const playPromise = audio.play();
+
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          isBgmPlaying = true;
+          fadeBgmVolumeTo(BGM_NORMAL_VOL, 500);
+        })
+        .catch((err) => {
+          console.warn('BGM Autoplay blocked until user tap:', err);
+          isBgmPlaying = false;
+        });
     }
-    if (bgmAudioCtx.state === 'suspended') {
-      bgmAudioCtx.resume();
-    }
-
-    bgmMasterGain = bgmAudioCtx.createGain();
-    bgmMasterGain.gain.setValueAtTime(0.001, bgmAudioCtx.currentTime);
-    bgmMasterGain.gain.exponentialRampToValueAtTime(BGM_NORMAL_VOL, bgmAudioCtx.currentTime + 1.2);
-    bgmMasterGain.connect(bgmAudioCtx.destination);
-
-    const droneFreqs = [130.81, 196.00];
-    droneFreqs.forEach(freq => {
-      const osc = bgmAudioCtx.createOscillator();
-      const droneGain = bgmAudioCtx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, bgmAudioCtx.currentTime);
-      droneGain.gain.setValueAtTime(0.18, bgmAudioCtx.currentTime);
-      osc.connect(droneGain);
-      droneGain.connect(bgmMasterGain);
-      osc.start();
-    });
-
-    let stepIndex = 0;
-    const playSoftPluck = () => {
-      if (!isBgmPlaying || !bgmAudioCtx || bgmAudioCtx.state !== 'running') return;
-
-      const now = bgmAudioCtx.currentTime;
-      const noteFreq = FESTIVE_PENTATONIC_NOTES[stepIndex % FESTIVE_PENTATONIC_NOTES.length];
-      stepIndex = (stepIndex + Math.floor(1 + Math.random() * 2)) % FESTIVE_PENTATONIC_NOTES.length;
-
-      const osc = bgmAudioCtx.createOscillator();
-      const noteGain = bgmAudioCtx.createGain();
-
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(noteFreq, now);
-
-      noteGain.gain.setValueAtTime(0.001, now);
-      noteGain.gain.linearRampToValueAtTime(0.32, now + 0.08);
-      noteGain.gain.exponentialRampToValueAtTime(0.001, now + 2.1);
-
-      osc.connect(noteGain);
-      noteGain.connect(bgmMasterGain);
-
-      osc.start(now);
-      osc.stop(now + 2.15);
-    };
-
     isBgmPlaying = true;
-    playSoftPluck();
-    bgmNoteTimer = setInterval(playSoftPluck, 2200);
+    fadeBgmVolumeTo(BGM_NORMAL_VOL, 500);
     return true;
   } catch (e) {
-    console.warn('BGM init error:', e);
+    console.warn('BGM start error:', e);
     return false;
   }
 }
 
 function stopSoothingBackgroundMusic() {
   isBgmPlaying = false;
-  if (bgmNoteTimer) {
-    clearInterval(bgmNoteTimer);
-    bgmNoteTimer = null;
+  if (bgmFadeInterval) {
+    clearInterval(bgmFadeInterval);
+    bgmFadeInterval = null;
   }
-  if (bgmAudioCtx) {
+  if (bgmAudioEl) {
     try {
-      bgmAudioCtx.close();
+      bgmAudioEl.pause();
     } catch (e) {}
-    bgmAudioCtx = null;
-    bgmMasterGain = null;
   }
 }
 
@@ -1182,11 +1193,12 @@ function toggleSoothingBackgroundMusic() {
   }
 }
 
+// Jab Number call hoga (shouldDuck = true), tab music BGM_DUCKED_VOL par chala jayega,
+// aur Number bolne ke baad (shouldDuck = false) wapas BGM_NORMAL_VOL par aa jayega!
 function duckBackgroundMusic(shouldDuck) {
-  if (!isBgmPlaying || !bgmAudioCtx || !bgmMasterGain) return;
-  const now = bgmAudioCtx.currentTime;
+  if (!isBgmPlaying || !bgmAudioEl) return;
   const target = shouldDuck ? BGM_DUCKED_VOL : BGM_NORMAL_VOL;
-  bgmMasterGain.gain.setTargetAtTime(target, now, 0.15);
+  fadeBgmVolumeTo(target, shouldDuck ? 120 : 400);
 }
 
 /* ============================================================================
