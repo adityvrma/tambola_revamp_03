@@ -1,12 +1,43 @@
-<!-- Admin Login Modal -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diwali Tambola Pro - Host Command Center</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- Toast Banner -->
+  <div id="globalToastBanner" class="toast-banner"></div>
+
+  <!-- Top Navigation & State Machine Pill -->
+  <div class="top-control-bar">
+    <div class="control-title">
+      <span>🪔 Diwali Tambola Pro</span>
+      <span id="stateMachineBadge" class="state-pill">SETUP</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+      <button class="btn btn-dark btn-sm" onclick="openPastRoundsModal()">
+        📜 Past Rounds (<span id="pastRoundsBadge">0</span>)
+      </button>
+      <div class="switch-tabs">
+        <a href="admin.html" class="tab-btn active">🎛️ Host Panel</a>
+        <a href="index.html" target="_blank" class="tab-btn">📱 Player App ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Login Modal -->
   <div id="adminLoginModal" class="modal-overlay show">
     <div class="modal-box">
       <h2 style="color: var(--gold); margin-bottom: 8px;">🔐 Host / Admin Authentication</h2>
       <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 14px;">
-        Enter Admin Credentials or use your <b>hostSecretToken</b> recovery URL.
+        Enter Admin Credentials or use your <b>hostSecretToken</b> recovery URL.<br/>
+        <span style="color: var(--gold-bright);"></b></span>
       </p>
-      <input type="text" id="adminIdInput" class="input-field" placeholder="Admin ID" autocomplete="off" style="margin-bottom: 10px;" />
-      <input type="password" id="adminPassInput" class="input-field" placeholder="Password" autocomplete="new-password" style="margin-bottom: 12px;" />
+      <input type="text" id="adminIdInput" class="input-field" value="admin" placeholder="Admin ID" style="margin-bottom: 10px;" />
+      <input type="password" id="adminPassInput" class="input-field" value="diwali123" placeholder="Password" style="margin-bottom: 12px;" />
       <p id="loginErrText" style="color: var(--danger); font-size: 0.84rem; display: none; margin-bottom: 10px;">
         ❌ Invalid credentials!
       </p>
