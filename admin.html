@@ -29,17 +29,17 @@
   </div>
 
   <!-- Admin Login Modal -->
+<!-- Admin Login Modal -->
   <div id="adminLoginModal" class="modal-overlay show">
     <div class="modal-box">
       <h2 style="color: var(--gold); margin-bottom: 8px;">🔐 Host / Admin Authentication</h2>
       <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 14px;">
-        Enter Admin Credentials or use your <b>hostSecretToken</b> recovery URL.<br/>
-        <span style="color: var(--gold-bright);">Default ID: <b>admin</b> | Pass: <b>diwali123</b></span>
+        Authorized access only. Please enter your Host credentials to unlock the Command Center.
       </p>
-      <input type="text" id="adminIdInput" class="input-field" value="admin" placeholder="Admin ID" style="margin-bottom: 10px;" />
-      <input type="password" id="adminPassInput" class="input-field" value="diwali123" placeholder="Password" style="margin-bottom: 12px;" />
+      <input type="text" id="adminIdInput" class="input-field" placeholder="Enter Admin ID" autocomplete="off" style="margin-bottom: 10px;" />
+      <input type="password" id="adminPassInput" class="input-field" placeholder="Enter Password" autocomplete="new-password" style="margin-bottom: 12px;" />
       <p id="loginErrText" style="color: var(--danger); font-size: 0.84rem; display: none; margin-bottom: 10px;">
-        ❌ Invalid credentials! Use admin / diwali123
+        ❌ Invalid Admin ID or Password! Access Denied.
       </p>
       <button class="btn btn-gold" style="width: 100%;" onclick="authenticateAdmin()">
         Unlock Host Command Center
